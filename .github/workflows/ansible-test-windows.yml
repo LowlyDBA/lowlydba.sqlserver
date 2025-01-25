@@ -133,6 +133,28 @@ jobs:
           $ws = ConvertTo-LinuxPathCrappy -LiteralPath "${{ github.workspace }}"
           Add-Content -LiteralPath $env:GITHUB_ENV -Value "GHWS=$ws"
 
+      - name: Set up WSL2 Port Forwarding
+        run: |
+          $WSL2_IP = wsl.exe -e sh -c "ip addr show eth0 | grep 'inet ' | awk '{print $2}' | cut -d/ -f1" | Out-String
+          $WSL2_IP = $WSL2_IP.Trim()
+
+          # Set up port forwarding for PSRP
+          netsh interface portproxy add v4tov4 listenaddress=127.0.0.1 listenport=5986 connectaddress=$WSL2_IP connectport=5986
+
+          # Verify port forwarding
+          netsh interface portproxy show v4tov4
+        shell: powershell
+        
+      - name: Allow WinRM Port in Firewall
+        run: |
+          netsh advfirewall firewall add rule name="Allow WinRM" dir=in action=allow protocol=TCP localport=5986
+        shell: pwsh
+
+      - name: Test WSL2 Connection
+        run: |
+          curl -k https://127.0.0.1:5986/wsman
+        shell: pwsh
+
       # Override break-sys-pkg defaults, because we don't need to bother with python venv for CI
       - name: Install ansible-base (${{ matrix.ansible }})
         run: |
@@ -176,7 +198,7 @@ jobs:
       - name: Run integration test
         run: |
           pushd "${{ env.GHWS }}/ansible_collections/${{env.NAMESPACE}}/${{env.COLLECTION_NAME}}"
-          ansible-test windows-integration -v --color --retry-on-error --continue-on-error --diff --coverage --requirements windows/group/${{ matrix.group }}/
+          ansible-test windows-integration -vvvvv --color --retry-on-error --continue-on-error --diff --coverage --requirements windows/group/${{ matrix.group }}/
 
       - name: Generate coverage report
         run: |
