@@ -98,10 +98,30 @@
         that:
           - result is changed
 
+    - name: Create Contained availability group
+      lowlydba.sqlserver.availability_group:
+        contained_availability_group: true
+        ag_name: "contained-ag"
+        database: "{{ omit }}"
+
+    - name: Drop contained availability group
+      lowlydba.sqlserver.availability_group:
+        state: absent
+        ag_name: "contained-ag"
+      register: result
+    - assert:
+        that:
+          - result is changed
+
   always:
     - name: Drop availability group
       lowlydba.sqlserver.availability_group:
         state: absent
+
+    - name: Drop contained availability group
+      lowlydba.sqlserver.availability_group:
+        state: absent
+        ag_name: "contained-ag"
 
     - name: Drop database
       lowlydba.sqlserver.database:

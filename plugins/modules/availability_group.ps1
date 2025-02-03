@@ -22,6 +22,7 @@ $spec = @{
         shared_path = @{type = "str"; required = $false; default = $null }
         dtc_support_enabled = @{type = "bool"; required = $false; }
         basic_availability_group = @{type = "bool"; required = $false; }
+        contained_availability_group = @{type = "bool"; required = $false; }
         database_health_trigger = @{type = "bool"; required = $false; }
         is_distributed_ag = @{type = "bool"; required = $false; }
         use_last_backup = @{type = "bool"; required = $false; }
@@ -102,6 +103,7 @@ $state = $module.Params.state
 [nullable[bool]]$useLastBackup = $module.Params.use_last_backup
 [nullable[bool]]$dtcSupportEnabled = $module.Params.dtc_support_enabled
 [nullable[bool]]$basicAvailabilityGroup = $module.Params.basic_availability_group
+[nullable[bool]]$containedAvailabilityGroup = $module.Params.contained_availability_group
 [nullable[bool]]$databaseHealthTrigger = $module.Params.database_health_trigger
 [nullable[bool]]$isDistributedAg = $module.Params.is_distributed_ag
 [nullable[bool]]$force = $module.Params.force
@@ -135,6 +137,9 @@ try {
         }
         if ($basicAvailabilityGroup -eq $true) {
             $agSplat.Add("Basic", $basicAvailabilityGroup)
+        }
+        if ($containedAvailabilityGroup -eq $true) {
+            $agSplat.Add("IsContained", $containedAvailabilityGroup)
         }
         if ($databaseHealthTrigger -eq $true) {
             $agSplat.Add("DatabaseHealthTrigger", $databaseHealthTrigger)

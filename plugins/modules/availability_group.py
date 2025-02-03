@@ -59,6 +59,11 @@ options:
       - Indicates whether the availability group is Basic Availability Group.
     type: bool
     required: false
+  contained_availability_group:
+    description:
+    - Indicates whether the availability group is Contained. Requires DBATools >= 2.1.15
+    type: bool
+    required: false
   database_health_trigger:
     description:
       - Indicates whether the availability group triggers the database health.
